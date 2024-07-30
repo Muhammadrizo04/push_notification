@@ -1,13 +1,12 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.template import Context, Template
+from django.template import Template, Context
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
-
     async def connect(self):
         await self.accept()
-        await self.channel_layer.group_add("notification", self.channel_name)
+        await self.channel_layer.group_add("notifications", self.channel_name)
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard("notifications", self.channel_name)
@@ -15,12 +14,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def send_notification(self, event):
         message = event["message"]
 
-        template = Template('<div class="notification><p>{{message}}</p></div>')
+        template = Template('<div class="notification"><p>{{ message }}</p></div>')
         context = Context({"message": message})
         render_notification = template.render(context)
 
         await self.send(
-            text_data=json.dump(
+            text_data=json.dumps(
                 {
                     "type": "notification",
                     "message": render_notification
