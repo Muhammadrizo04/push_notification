@@ -2,15 +2,26 @@ version: "3.8"
 
 services:
   django:
-    container_name: django
+    container_name: django_push_notification
     build:
-      context: ./core
-    command: uvicorn core.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --log-level debug --reload
+      context: .
+    command: uvicorn push_notification.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --log-level debug --reload
     volumes:
-      - ./core:/usr/src/app/
+      - .:/usr/src/app/
     ports:
       - 8000:8000
     env_file:
-      -./env_vars_django.txt
-    depends_on:
-      - redis
+      - ./env_vars_django.txt
+
+  rabbitmq:
+    image: rabbitmq:management
+    restart: always
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  redis:
+    image: redis:7.0.11-alpline
+    ports:
+      - "6379:6379"

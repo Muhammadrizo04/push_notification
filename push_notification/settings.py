@@ -29,7 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # # Application definition.
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
+
 DEBUG = os.environ.get("DEBUG", default=False) == True
+
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 INSTALLED_APPS = [
@@ -59,8 +61,7 @@ ROOT_URLCONF = 'push_notification.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,7 +129,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "CONFIG": {
+            "host": [("redis", 6379)],
+        },
     },
 }
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "amqp://guest:guest@rabbitmq:5672/")
+CELERY_BROKER_BACKEND = os.environ.get("CELERY_BACKEND", "redis://redis:6379/0")
